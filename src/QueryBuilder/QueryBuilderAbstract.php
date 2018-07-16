@@ -84,6 +84,11 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
     protected $fieldsToUpdate = [];
 
     /**
+     * @var bool
+     */
+    protected $useCacheResults = false;
+
+    /**
      * QueryBuilderAbstract constructor.
      * @param \PDO $pdo
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
@@ -282,5 +287,13 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
         }
 
         return (new DeleteQuery($this->pdo, $statement, $parameters))->setEntityClass($this->entityClass);
+    }
+
+    /**
+     * @param bool $use
+     */
+    public function useCacheResults(bool $use = true)
+    {
+        $this->useCacheResults = $use;
     }
 }
