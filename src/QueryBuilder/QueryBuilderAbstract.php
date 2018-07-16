@@ -2,6 +2,7 @@
 
 namespace Anytime\ORM\QueryBuilder;
 
+use Anytime\ORM\Cache\CacheResults;
 use Anytime\ORM\Converter\SnakeToCamelCaseStringConverter;
 use Anytime\ORM\EntityManager\Entity;
 
@@ -22,6 +23,10 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
      */
     protected $snakeToCamelCaseStringConverter;
 
+    /**
+     * @var CacheResults
+     */
+    protected $cacheResults;
 
     /**
      * @var string
@@ -92,11 +97,13 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
      * QueryBuilderAbstract constructor.
      * @param \PDO $pdo
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
+     * @param CacheResults $cacheResults
      */
-    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter)
+    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, CacheResults $cacheResults)
     {
         $this->snakeToCamelCaseStringConverter = $snakeToCamelCaseStringConverter;
         $this->pdo = $pdo;
+        $this->cacheResults = $cacheResults;
     }
 
     /**

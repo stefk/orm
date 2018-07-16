@@ -2,6 +2,7 @@
 
 namespace Anytime\ORM\Tests\QueryBuilder;
 
+use Anytime\ORM\Cache\CacheResults;
 use Anytime\ORM\Converter\SnakeToCamelCaseStringConverter;
 use Anytime\ORM\QueryBuilder\MySqlQueryBuilder;
 use PHPUnit\Framework\TestCase;
@@ -174,7 +175,8 @@ class MySqlQueryBuilderTest extends TestCase
     private function getQueryBuilder(): MySqlQueryBuilder
     {
         $pdo = $this->prophesize(\PDO::class)->reveal();
-        $queryBuilder = new MySqlQueryBuilder($pdo, new SnakeToCamelCaseStringConverter());
+        $cacheResults = $this->prophesize(CacheResults::class)->reveal(); // @TODO Mock methods
+        $queryBuilder = new MySqlQueryBuilder($pdo, new SnakeToCamelCaseStringConverter(), $cacheResults);
         return $queryBuilder;
     }
 }

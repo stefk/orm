@@ -2,6 +2,8 @@
 
 namespace Anytime\ORM\EntityManager;
 
+use Anytime\ORM\Cache\CacheKey;
+use Anytime\ORM\Cache\CacheResults;
 use Anytime\ORM\Converter\SnakeToCamelCaseStringConverter;
 use Anytime\ORM\Generator\EntityGenerator\EntityGeneratorInterface;
 use Anytime\ORM\Generator\EntityGenerator\EntityGenerator;
@@ -9,6 +11,7 @@ use Anytime\ORM\Generator\EntityGenerator\MySqlTableStructureRetriever;
 use Anytime\ORM\Generator\EntityManagerGenerator\EntityManagerGenerator;
 use Anytime\ORM\Generator\EntityManagerGenerator\EntityManagerGeneratorInterface;
 use Anytime\ORM\QueryBuilder\QueryBuilderFactory;
+use Psr\SimpleCache\CacheInterface;
 
 class Factory
 {
@@ -53,6 +56,17 @@ class Factory
      * @var string
      */
     private $userManagerDirectory;
+
+    /**
+     * @var CacheKey
+     */
+    private $cacheKey;
+
+    /**
+     * @var CacheInterface
+     */
+    private $cacheProvider;
+
 
     /**
      * @var string
@@ -179,6 +193,16 @@ class Factory
     }
 
     /**
+     * @param CacheInterface $cacheProvider
+     * @return Factory
+     */
+    public function setCacheProvider(CacheInterface $cacheProvider): Factory
+    {
+        $this->cacheProvider = $cacheProvider;
+        return $this;
+    }
+
+    /**
      * Create a MySQL entity manager based on the settings
      * @param \PDO $pdo
      * @return EntityManager
@@ -188,10 +212,12 @@ class Factory
         $this->checkSetting();
         $this->checkDynamicClasses();
 
+        $cacheResults = new CacheResults($this->cacheProvider, $this->cacheKey);
+
         $dynamicRepositoriesClass = $this->entityManagerNamespace . '\\DynamicRepositories';
         $dynamicManagersClass = $this->entityManagerNamespace . '\\DynamicManagers';
 
-        $queryBuilderFactory = new QueryBuilderFactory($pdo, $this->snakeToCamelCaseStringConverter, $this->databaseType);
+        $queryBuilderFactory = new QueryBuilderFactory($pdo, $this->snakeToCamelCaseStringConverter, $this->databaseType, $cacheResults);
 
         $dynamicRepositories = new $dynamicRepositoriesClass($pdo, $this->snakeToCamelCaseStringConverter, $queryBuilderFactory);
         $dynamicManagers = new $dynamicManagersClass($pdo, $dynamicRepositories);
