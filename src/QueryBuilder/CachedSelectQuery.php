@@ -40,9 +40,9 @@ class CachedSelectQuery extends QueryAbstract implements SelectQueryInterface
 
     /**
      * @param string $fetchDataFormat
-     * @return SelectQuery
+     * @return SelectQueryInterface
      */
-    public function setFetchDataFormat(string $fetchDataFormat): SelectQuery
+    public function setFetchDataFormat(string $fetchDataFormat): SelectQueryInterface
     {
         $this->fetchDataFormat = $fetchDataFormat;
         return $this;
