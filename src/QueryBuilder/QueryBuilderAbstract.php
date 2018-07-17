@@ -225,7 +225,21 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
             throw new \RuntimeException('Not in an ' . QueryBuilderAbstract::QUERY_TYPE_SELECT . ' context');
         }
 
-        $statement = $this->pdo->prepare($this->getSelectSQL());
+        $selectSQL = $this->getSelectSQL();
+
+        if($this->useCacheResults) {
+            $cachedData = $this->cacheResults->getQueryResultCachedData(
+                $this->entityClass::TABLENAME,
+                $selectSQL,
+                $this->parameters
+            );
+
+            if($cachedData) {
+                return (new CachedSelectQuery($cachedData))->setEntityClass($this->entityClass);
+            }
+        }
+
+        $statement = $this->pdo->prepare($selectSQL);
         return (new SelectQuery($this->pdo, $statement, $this->parameters))->setEntityClass($this->entityClass);
     }
 
