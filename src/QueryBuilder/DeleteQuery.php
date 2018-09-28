@@ -9,6 +9,7 @@ class DeleteQuery extends QueryAbstract implements DeleteQueryInterface
      */
     public function execute(): int
     {
+        $this->selectDatabase();
         $this->PDOStatement->execute($this->parameters);
         $this->throwPdoError($this->PDOStatement);
         return $this->PDOStatement->rowCount();

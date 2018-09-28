@@ -26,6 +26,12 @@ interface QueryBuilderInterface
     public function setParameter(string $paramName, $paramValue): QueryBuilderInterface;
 
     /**
+     * @param string|null $databaseName
+     * @return QueryBuilderInterface
+     */
+    public function setDatabaseName($databaseName): QueryBuilderInterface;
+
+    /**
      * @param string $select
      * @return QueryBuilderInterface
      */
@@ -142,4 +148,9 @@ interface QueryBuilderInterface
      * @return string
      */
     public function getFindByPrimaryKeySQLWhere(array $primaryKeys): string;
+
+    /**
+     * @return string
+     */
+    public function getUseDatabaseSQL(): string;
 }

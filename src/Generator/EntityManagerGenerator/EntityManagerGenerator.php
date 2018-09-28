@@ -53,6 +53,11 @@ class EntityManagerGenerator implements EntityManagerGeneratorInterface
     private $tableStructureRetriever;
 
     /**
+     * @var string
+     */
+    private $databaseName;
+
+    /**
      * EntityManagerGenerator constructor.
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
      * @param TableStructureRetrieverInterface $tableStructureRetriever
@@ -63,6 +68,7 @@ class EntityManagerGenerator implements EntityManagerGeneratorInterface
      * @param string $userManagerDirectory
      * @param string $userManagerNamespace
      * @param string $entityNamespace
+     * @param string|null $databaseName
      */
     public function __construct(
         SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter,
@@ -73,7 +79,9 @@ class EntityManagerGenerator implements EntityManagerGeneratorInterface
         string $userEntityRepositoryNamespace,
         string $userManagerDirectory,
         string $userManagerNamespace,
-        string $entityNamespace)
+        string $entityNamespace,
+        $databaseName
+    )
     {
         $this->snakeToCamelCaseStringConverter = $snakeToCamelCaseStringConverter;
         $this->tableStructureRetriever = $tableStructureRetriever;
@@ -85,6 +93,7 @@ class EntityManagerGenerator implements EntityManagerGeneratorInterface
             ->setUserManagerDirectory($userManagerDirectory)
             ->setUserManagerNamespace($userManagerNamespace)
             ->setEntityNamespace($entityNamespace)
+            ->setDatabaseName($databaseName)
         ;
     }
 
@@ -194,6 +203,16 @@ class EntityManagerGenerator implements EntityManagerGeneratorInterface
     }
 
     /**
+     * @param string|null $databaseName
+     * @return EntityManagerGenerator
+     */
+    public function setDatabaseName($databaseName): EntityManagerGenerator
+    {
+        $this->databaseName = $databaseName;
+        return $this;
+    }
+
+    /**
      * @param array $tableList
      */
     public function generate(array $tableList = [])
@@ -279,11 +298,11 @@ class EntityManagerGenerator implements EntityManagerGeneratorInterface
         $sourceCode .= "     */\n";
         $sourceCode .= "    public \$managers;\n";
         $sourceCode .= "\n";
-        $sourceCode .= "    public function __construct(\\PDO \$pdo, SnakeToCamelCaseStringConverter \$snakeToCamelCaseStringConverter, DynamicRepositories \$dynamicRepositories, DynamicManagers \$dynamicManagers, QueryBuilderFactory \$queryBuilderFactory, string \$databaseType)\n";
+        $sourceCode .= "    public function __construct(\\PDO \$pdo, SnakeToCamelCaseStringConverter \$snakeToCamelCaseStringConverter, DynamicRepositories \$dynamicRepositories, DynamicManagers \$dynamicManagers, QueryBuilderFactory \$queryBuilderFactory, string \$databaseType, \$databaseName = null)\n";
         $sourceCode .= "    {\n";
         $sourceCode .= "        \$this->repositories = \$dynamicRepositories;\n";
         $sourceCode .= "        \$this->managers = \$dynamicManagers;\n";
-        $sourceCode .= "        parent::__construct(\$pdo, \$snakeToCamelCaseStringConverter, \$queryBuilderFactory, \$databaseType);\n";
+        $sourceCode .= "        parent::__construct(\$pdo, \$snakeToCamelCaseStringConverter, \$queryBuilderFactory, \$databaseType, \$databaseName);\n";
         $sourceCode .= "    }\n";
         $sourceCode .= "}\n\n";
 

@@ -25,16 +25,23 @@ class QueryAbstract
     protected $entityClass;
 
     /**
+     * @var callable
+     */
+    protected $fnDatabaseSwitcher;
+
+    /**
      * Query constructor.
      * @param \PDO $pdo
      * @param \PDOStatement $PDOStatement
      * @param $parameters
+     * @param callable $fnDatabaseSwitcher
      */
-    public function __construct(\PDO $pdo, \PDOStatement $PDOStatement, $parameters)
+    public function __construct(\PDO $pdo, \PDOStatement $PDOStatement, $parameters, callable $fnDatabaseSwitcher)
     {
         $this->pdo = $pdo;
         $this->PDOStatement = $PDOStatement;
         $this->parameters = $parameters;
+        $this->fnDatabaseSwitcher = $fnDatabaseSwitcher;
     }
 
     /**
@@ -57,5 +64,15 @@ class QueryAbstract
             $msg = array_key_exists(2, $errInfo) ? $errInfo[2] : 'Unknown error';
             throw new \RuntimeException($msg, (int)$errInfo[1]);
         }
+    }
+
+    /**
+     * @return $this
+     */
+    protected function selectDatabase()
+    {
+        $fn = $this->fnDatabaseSwitcher;
+        $fn();
+        return $this;
     }
 }

@@ -84,6 +84,11 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
     protected $fieldsToUpdate = [];
 
     /**
+     * @var string
+     */
+    protected $databaseName;
+
+    /**
      * QueryBuilderAbstract constructor.
      * @param \PDO $pdo
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
@@ -136,6 +141,24 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
     public function setParameter(string $paramName, $paramValue): QueryBuilderInterface
     {
         $this->parameters[$paramName] = $paramValue;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseName(): string
+    {
+        return $this->databaseName;
+    }
+
+    /**
+     * @param string|null $databaseName
+     * @return QueryBuilderAbstract
+     */
+    public function setDatabaseName($databaseName): QueryBuilderInterface
+    {
+        $this->databaseName = $databaseName;
         return $this;
     }
 
@@ -243,9 +266,8 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
         if($this->queryType !== QueryBuilderAbstract::QUERY_TYPE_SELECT) {
             throw new \RuntimeException('Not in an ' . QueryBuilderAbstract::QUERY_TYPE_SELECT . ' context');
         }
-
         $statement = $this->pdo->prepare($this->getSelectSQL());
-        return (new SelectQuery($this->pdo, $statement, $this->parameters))->setEntityClass($this->entityClass);
+        return (new SelectQuery($this->pdo, $statement, $this->parameters, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
     }
 
     /**
@@ -259,7 +281,7 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
 
         $data = $entity->extractSetterUsedData();
         $statement = $this->pdo->prepare($this->getInsertSQL($data));
-        return (new InsertQuery($this->pdo, $statement, $data))->setEntityClass($this->entityClass);
+        return (new InsertQuery($this->pdo, $statement, $data, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
     }
 
     /**
@@ -283,11 +305,11 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
             }
 
             $statement = $this->pdo->prepare($this->getUpdateByPrimaryKeySQL($fieldsToUpdate));
-            return (new UpdateQuery($this->pdo, $statement, $data, $fieldsToUpdate))->setEntityClass($this->entityClass);
+            return (new UpdateQuery($this->pdo, $statement, $data, $fieldsToUpdate, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
 
         } else {
             $statement = $this->pdo->prepare($this->getUpdateByCriteriaSQL($this->fieldsToUpdate));
-            return (new UpdateQuery($this->pdo, $statement, $this->parameters, $this->fieldsToUpdate))->setEntityClass($this->entityClass);
+            return (new UpdateQuery($this->pdo, $statement, $this->parameters, $this->fieldsToUpdate, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
         }
     }
 
@@ -312,6 +334,22 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
             $parameters = $this->parameters;
         }
 
-        return (new DeleteQuery($this->pdo, $statement, $parameters))->setEntityClass($this->entityClass);
+        return (new DeleteQuery($this->pdo, $statement, $parameters, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
+    }
+
+    /**
+     * @return callable
+     */
+    public function getFnUseDatabase(): callable
+    {
+        $sql = $this->getUseDatabaseSQL();
+        $pdo = $this->pdo;
+
+        return function() use ($sql, $pdo) {
+            if($stmt = $pdo->query($sql)) {
+                return $stmt->execute();
+            }
+            return false;
+        };
     }
 }

@@ -181,9 +181,10 @@ class Factory
     /**
      * Create a MySQL entity manager based on the settings
      * @param \PDO $pdo
+     * @param null $databaseName
      * @return EntityManager
      */
-    public function createEntityManager(\PDO $pdo)
+    public function createEntityManager(\PDO $pdo, $databaseName = null)
     {
         $this->checkSetting();
         $this->checkDynamicClasses();
@@ -191,7 +192,7 @@ class Factory
         $dynamicRepositoriesClass = $this->entityManagerNamespace . '\\DynamicRepositories';
         $dynamicManagersClass = $this->entityManagerNamespace . '\\DynamicManagers';
 
-        $queryBuilderFactory = new QueryBuilderFactory($pdo, $this->snakeToCamelCaseStringConverter, $this->databaseType);
+        $queryBuilderFactory = new QueryBuilderFactory($pdo, $this->snakeToCamelCaseStringConverter, $this->databaseType, $databaseName);
 
         $dynamicRepositories = new $dynamicRepositoriesClass($pdo, $this->snakeToCamelCaseStringConverter, $queryBuilderFactory);
         $dynamicManagers = new $dynamicManagersClass($pdo, $dynamicRepositories);
@@ -203,7 +204,8 @@ class Factory
             $dynamicRepositories,
             $dynamicManagers,
             $queryBuilderFactory,
-            $this->databaseType
+            $this->databaseType,
+            $databaseName
         );
 
         $dynamicManagers->setDynamicEntityManager($dynamicEntityManager);
@@ -216,13 +218,13 @@ class Factory
      * @param \PDO $pdo
      * @return EntityGeneratorInterface
      */
-    public function createEntityGenerator(\PDO $pdo): EntityGeneratorInterface
+    public function createEntityGenerator(\PDO $pdo, $databaseName = null): EntityGeneratorInterface
     {
         switch($this->databaseType) {
             case self::DATABASE_TYPE_MYSQL :
                 return new EntityGenerator(
                     $this->snakeToCamelCaseStringConverter,
-                    new MySqlTableStructureRetriever($pdo),
+                    new MySqlTableStructureRetriever($pdo, $databaseName),
                     $this->entityDirectory,
                     $this->entityNamespace
                 );
@@ -233,22 +235,24 @@ class Factory
 
     /**
      * @param \PDO $pdo
+     * @param null $databaseName
      * @return EntityManagerGeneratorInterface
      */
-    public function createEntityManagerGenerator(\PDO $pdo): EntityManagerGeneratorInterface
+    public function createEntityManagerGenerator(\PDO $pdo, $databaseName = null): EntityManagerGeneratorInterface
     {
         switch($this->databaseType) {
             case self::DATABASE_TYPE_MYSQL :
                 return new EntityManagerGenerator(
                     $this->snakeToCamelCaseStringConverter,
-                    new MySqlTableStructureRetriever($pdo),
+                    new MySqlTableStructureRetriever($pdo, $databaseName),
                     $this->entityManagerDirectory,
                     $this->entityManagerNamespace,
                     $this->userEntityRepositoryDirectory,
                     $this->userEntityRepositoryNamespace,
                     $this->userManagerDirectory,
                     $this->userManagerNamespace,
-                    $this->entityNamespace
+                    $this->entityNamespace,
+                    $databaseName
                 );
         }
 

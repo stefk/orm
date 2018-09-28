@@ -10,12 +10,19 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
     private $pdo;
 
     /**
+     * @var string
+     */
+    private $databaseName;
+
+    /**
      * MySqlTableStructureRetriever constructor.
      * @param \PDO $pdo
+     * @param string|null $databaseName
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(\PDO $pdo, $databaseName = null)
     {
         $this->pdo = $pdo;
+        $this->databaseName = $databaseName;
     }
 
     /**
@@ -27,6 +34,8 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
         $result = [];
 
         if(count($tableList) < 1) {
+            $this->useDatabaseName();
+
             $sql = 'SHOW TABLES';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
@@ -50,6 +59,8 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
     {
         $requiredKeys = ['Field', 'Type', 'Null', 'Key', 'Default'];
         $returnStruct = [];
+
+        $this->useDatabaseName();
 
         $sql = 'DESCRIBE `' . $tableName . '`';
         $stmt = $this->pdo->prepare($sql);
@@ -96,6 +107,8 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
     {
         $requiredKeys = ['Key_name', 'Column_name', 'Null', 'Index_type'];
         $returnIndexes = [];
+
+        $this->useDatabaseName();
 
         $sql = 'SHOW INDEXES FROM `' . $tableName . '`';
         $stmt = $this->pdo->prepare($sql);
@@ -190,5 +203,24 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
             case 'year': return $defaultValue . '-01-01 00:00:00';
         }
         return '';
+    }
+
+    /**
+     * @return bool
+     */
+    protected function useDatabaseName()
+    {
+        if($this->databaseName) {
+            $sql = 'USE `' . $this->databaseName . '`';
+
+            if($stmt = $this->pdo->prepare($sql)) {
+                if($stmt->execute()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return true;
     }
 }

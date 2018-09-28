@@ -43,6 +43,8 @@ class SelectQuery extends QueryAbstract implements SelectQueryInterface
      */
     public function fetch()
     {
+        $this->selectDatabase();
+
         if($this->fetchDone) {
             $this->PDOStatement->execute($this->parameters);
             $this->throwPdoError($this->PDOStatement);
@@ -69,6 +71,8 @@ class SelectQuery extends QueryAbstract implements SelectQueryInterface
     {
         $results = [];
 
+        $this->selectDatabase();
+
         $this->PDOStatement->execute($this->parameters);
         $this->throwPdoError($this->PDOStatement);
         $fetchedData = $this->PDOStatement->fetchAll(\PDO::FETCH_ASSOC);
@@ -91,6 +95,8 @@ class SelectQuery extends QueryAbstract implements SelectQueryInterface
      */
     public function fetchSingleScalarResult()
     {
+        $this->selectDatabase();
+
         $this->PDOStatement->execute($this->parameters);
         $this->throwPdoError($this->PDOStatement);
         $fetchedData = $this->PDOStatement->fetch(\PDO::FETCH_NUM);

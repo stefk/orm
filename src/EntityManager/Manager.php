@@ -60,7 +60,15 @@ abstract class Manager
      */
     public function createQueryBuilder($alias = null, string $queryType = QueryBuilderAbstract::QUERY_TYPE_SELECT): QueryBuilderInterface
     {
-        return $this->entityRepository->createQueryBuilder($alias, $queryType);
+        $qb = $this->entityRepository->createQueryBuilder($alias, $queryType);
+
+        $dbName = $this->entityManager->getDatabaseName();
+
+        if($dbName) {
+            $qb->setDatabaseName($dbName);
+        }
+
+        return $qb;
     }
 
     /**
@@ -69,7 +77,15 @@ abstract class Manager
      */
     public function createDeleteQueryBuilder($alias = null)
     {
-        return $this->entityRepository->createDeleteQueryBuilder($alias);
+        $qb = $this->entityRepository->createDeleteQueryBuilder($alias);
+
+        $dbName = $this->entityManager->getDatabaseName();
+
+        if($dbName) {
+            $qb->setDatabaseName($dbName);
+        }
+
+        return $qb;
     }
 
     /**
@@ -78,7 +94,15 @@ abstract class Manager
      */
     public function createUpdateQueryBuilder($alias = null)
     {
-        return $this->entityRepository->createUpdateQueryBuilder($alias);
+        $qb = $this->entityRepository->createUpdateQueryBuilder($alias);
+
+        $dbName = $this->entityManager->getDatabaseName();
+
+        if($dbName) {
+            $qb->setDatabaseName($dbName);
+        }
+
+        return $qb;
     }
 
     /**

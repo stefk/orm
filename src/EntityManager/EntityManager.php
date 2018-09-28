@@ -23,9 +23,21 @@ abstract class EntityManager
     protected $snakeToCamelCaseStringConverter;
 
     /**
+     * @var QueryBuilderFactory
+     */
+    protected $queryBuilderFactory;
+
+    /**
      * @var string
      */
     protected $databaseType;
+
+    /**
+     * If set, the ORM with switch to the right database name before making the query
+     *
+     * @var null
+     */
+    protected $databaseName = null;
 
     /**
      * EntityManager constructor.
@@ -33,13 +45,23 @@ abstract class EntityManager
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
      * @param QueryBuilderFactory $queryBuilderFactory
      * @param string $databaseType
+     * @param string|null $databaseName
      */
-    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory, string $databaseType)
+    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory, string $databaseType, string $databaseName = null)
     {
         $this->pdo = $pdo;
         $this->snakeToCamelCaseStringConverter = $snakeToCamelCaseStringConverter;
-        $this->databaseType = $databaseType;
         $this->queryBuilderFactory = $queryBuilderFactory;
+        $this->databaseType = $databaseType;
+        $this->databaseName = $databaseName;
+    }
+
+    /**
+     * @return null
+     */
+    public function getDatabaseName()
+    {
+        return $this->databaseName;
     }
 
     /**
@@ -166,8 +188,9 @@ abstract class EntityManager
      */
     public function selectQuery(string $sql, array $parameters = [], string $entityClass = null)
     {
+        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->pdo->prepare($sql);
-        $query = new SelectQuery($this->pdo, $statement, $parameters);
+        $query = new SelectQuery($this->pdo, $statement, $parameters, $queryBuilder->getFnUseDatabase());
 
         if($entityClass && class_exists($entityClass) && is_subclass_of($entityClass, Entity::class)) {
             $query->setEntityClass($entityClass);
@@ -183,8 +206,9 @@ abstract class EntityManager
      */
     public function deleteQuery(string $sql, array $parameters = [])
     {
+        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->pdo->prepare($sql);
-        $query = new DeleteQuery($this->pdo, $statement, $parameters);
+        $query = new DeleteQuery($this->pdo, $statement, $parameters, $queryBuilder->getFnUseDatabase());
         return $query;
     }
 
@@ -195,8 +219,9 @@ abstract class EntityManager
      */
     public function updateQuery(string $sql, array $parameters = [])
     {
+        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->pdo->prepare($sql);
-        $query = new UpdateQuery($this->pdo, $statement, $parameters);
+        $query = new UpdateQuery($this->pdo, $statement, $parameters, [], $queryBuilder->getFnUseDatabase());
         return $query;
     }
 
@@ -207,8 +232,9 @@ abstract class EntityManager
      */
     public function insertQuery(string $sql, array $parameters = [])
     {
+        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->pdo->prepare($sql);
-        $query = new InsertQuery($this->pdo, $statement, $parameters);
+        $query = new InsertQuery($this->pdo, $statement, $parameters, $queryBuilder->getFnUseDatabase());
         return $query;
     }
 }

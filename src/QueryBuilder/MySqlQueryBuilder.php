@@ -188,4 +188,12 @@ class MySqlQueryBuilder extends QueryBuilderAbstract
 
         return $where;
     }
+
+    /**
+     * @return string
+     */
+    public function getUseDatabaseSQL(): string
+    {
+        return 'USE `' . $this->databaseName . '`';
+    }
 }
