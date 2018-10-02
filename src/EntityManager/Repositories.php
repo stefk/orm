@@ -13,9 +13,9 @@ class Repositories
     protected $loadedRepositories = [];
 
     /**
-     * @var \PDO
+     * @var DBConnection
      */
-    private $pdo;
+    private $DBConnection;
 
     /**
      * @var SnakeToCamelCaseStringConverter
@@ -29,13 +29,13 @@ class Repositories
 
     /**
      * EntityManager constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
      * @param QueryBuilderFactory $queryBuilderFactory
      */
-    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory)
+    public function __construct(DBConnection $DBConnection, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory)
     {
-        $this->pdo = $pdo;
+        $this->DBConnection = $DBConnection;
         $this->snakeToCamelCaseStringConverter = $snakeToCamelCaseStringConverter;
         $this->queryBuilderFactory = $queryBuilderFactory;
     }
@@ -54,15 +54,15 @@ class Repositories
         }
 
         if(class_exists($class)) {
-            return (new $class($this->pdo, $this->snakeToCamelCaseStringConverter, $this->queryBuilderFactory))
+            return (new $class($this->DBConnection, $this->snakeToCamelCaseStringConverter, $this->queryBuilderFactory))
                 ->setTableName($tableName)
                 ->setClassName($entityClassName);
         } elseif(class_exists($defaultClass)) {
-            return (new $defaultClass($this->pdo, $this->snakeToCamelCaseStringConverter, $this->queryBuilderFactory))
+            return (new $defaultClass($this->DBConnection, $this->snakeToCamelCaseStringConverter, $this->queryBuilderFactory))
                 ->setTableName($tableName)
                 ->setClassName($entityClassName);
         } else {
-            return (new DefaultEntityRepository($this->pdo, $this->snakeToCamelCaseStringConverter, $this->queryBuilderFactory))
+            return (new DefaultEntityRepository($this->DBConnection, $this->snakeToCamelCaseStringConverter, $this->queryBuilderFactory))
                 ->setTableName($tableName)
                 ->setClassName($entityClassName);
             ;

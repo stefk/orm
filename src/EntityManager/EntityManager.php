@@ -13,9 +13,9 @@ use Anytime\ORM\QueryBuilder\UpdateQuery;
 abstract class EntityManager
 {
     /**
-     * @var \PDO
+     * @var DBConnection
      */
-    protected $pdo;
+    protected $DBConnection;
 
     /**
      * @var SnakeToCamelCaseStringConverter
@@ -41,15 +41,15 @@ abstract class EntityManager
 
     /**
      * EntityManager constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
      * @param QueryBuilderFactory $queryBuilderFactory
      * @param string $databaseType
      * @param string|null $databaseName
      */
-    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory, string $databaseType, string $databaseName = null)
+    public function __construct(DBConnection $DBConnection, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory, string $databaseType, string $databaseName = null)
     {
-        $this->pdo = $pdo;
+        $this->DBConnection = $DBConnection;
         $this->snakeToCamelCaseStringConverter = $snakeToCamelCaseStringConverter;
         $this->queryBuilderFactory = $queryBuilderFactory;
         $this->databaseType = $databaseType;
@@ -189,8 +189,8 @@ abstract class EntityManager
     public function selectQuery(string $sql, array $parameters = [], string $entityClass = null)
     {
         $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
-        $statement = $this->pdo->prepare($sql);
-        $query = new SelectQuery($this->pdo, $statement, $parameters, $queryBuilder->getFnUseDatabase());
+        $statement = $this->DBConnection->prepare($sql);
+        $query = new SelectQuery($this->DBConnection, $statement, $parameters, $queryBuilder->getFnUseDatabase());
 
         if($entityClass && class_exists($entityClass) && is_subclass_of($entityClass, Entity::class)) {
             $query->setEntityClass($entityClass);
@@ -207,8 +207,8 @@ abstract class EntityManager
     public function deleteQuery(string $sql, array $parameters = [])
     {
         $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
-        $statement = $this->pdo->prepare($sql);
-        $query = new DeleteQuery($this->pdo, $statement, $parameters, $queryBuilder->getFnUseDatabase());
+        $statement = $this->DBConnection->prepare($sql);
+        $query = new DeleteQuery($this->DBConnection, $statement, $parameters, $queryBuilder->getFnUseDatabase());
         return $query;
     }
 
@@ -220,8 +220,8 @@ abstract class EntityManager
     public function updateQuery(string $sql, array $parameters = [])
     {
         $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
-        $statement = $this->pdo->prepare($sql);
-        $query = new UpdateQuery($this->pdo, $statement, $parameters, [], $queryBuilder->getFnUseDatabase());
+        $statement = $this->DBConnection->prepare($sql);
+        $query = new UpdateQuery($this->DBConnection, $statement, $parameters, [], $queryBuilder->getFnUseDatabase());
         return $query;
     }
 
@@ -233,8 +233,8 @@ abstract class EntityManager
     public function insertQuery(string $sql, array $parameters = [])
     {
         $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
-        $statement = $this->pdo->prepare($sql);
-        $query = new InsertQuery($this->pdo, $statement, $parameters, $queryBuilder->getFnUseDatabase());
+        $statement = $this->DBConnection->prepare($sql);
+        $query = new InsertQuery($this->DBConnection, $statement, $parameters, $queryBuilder->getFnUseDatabase());
         return $query;
     }
 }

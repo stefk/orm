@@ -2,17 +2,19 @@
 
 namespace Anytime\ORM\QueryBuilder;
 
+use Anytime\ORM\EntityManager\DBConnection;
+
 class UpdateQuery extends QueryAbstract implements UpdateQueryInterface
 {
     /**
      * UpdateQuery constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      * @param \PDOStatement $PDOStatement
      * @param $parameters
      * @param array $fieldsToUpdate
      * @param callable $fnDatabaseSwitcher
      */
-    public function __construct(\PDO $pdo, \PDOStatement $PDOStatement, $parameters, array $fieldsToUpdate = [], callable $fnDatabaseSwitcher)
+    public function __construct(DBConnection $DBConnection, \PDOStatement $PDOStatement, $parameters, array $fieldsToUpdate = [], callable $fnDatabaseSwitcher)
     {
         $newFieldsToUpdate = [];
 
@@ -23,7 +25,7 @@ class UpdateQuery extends QueryAbstract implements UpdateQueryInterface
 
         unset($fieldsToUpdate);
 
-        parent::__construct($pdo, $PDOStatement, $parameters + $newFieldsToUpdate, $fnDatabaseSwitcher);
+        parent::__construct($DBConnection, $PDOStatement, $parameters + $newFieldsToUpdate, $fnDatabaseSwitcher);
     }
 
     /**

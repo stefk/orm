@@ -10,17 +10,17 @@ class Managers
     protected $loadedManagers = [];
 
     /**
-     * @var \PDO
+     * @var DBConnection
      */
-    private $pdo;
+    private $DBConnection;
 
     /**
      * EntityManager constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(DBConnection $DBConnection)
     {
-        $this->pdo = $pdo;
+        $this->DBConnection = $DBConnection;
     }
 
     /**
@@ -37,11 +37,11 @@ class Managers
         }
 
         if(class_exists($class)) {
-            return (new $class($this->pdo, $entityRepository, $entityManager));
+            return (new $class($this->DBConnection, $entityRepository, $entityManager));
         } elseif(class_exists($defaultClass)) {
-            return (new $defaultClass($this->pdo, $entityRepository, $entityManager));
+            return (new $defaultClass($this->DBConnection, $entityRepository, $entityManager));
         } else {
-            return (new DefaultManager($this->pdo, $entityRepository, $entityManager));
+            return (new DefaultManager($this->DBConnection, $entityRepository, $entityManager));
         }
     }
 }

@@ -2,12 +2,14 @@
 
 namespace Anytime\ORM\QueryBuilder;
 
+use Anytime\ORM\EntityManager\DBConnection;
+
 class QueryAbstract
 {
     /**
-     * @var \PDO
+     * @var DBConnection
      */
-    protected $pdo;
+    protected $DBConnection;
 
     /**
      * @var \PDOStatement
@@ -29,16 +31,17 @@ class QueryAbstract
      */
     protected $fnDatabaseSwitcher;
 
+
     /**
      * Query constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      * @param \PDOStatement $PDOStatement
      * @param $parameters
      * @param callable $fnDatabaseSwitcher
      */
-    public function __construct(\PDO $pdo, \PDOStatement $PDOStatement, $parameters, callable $fnDatabaseSwitcher)
+    public function __construct(DBConnection $DBConnection, \PDOStatement $PDOStatement, $parameters, callable $fnDatabaseSwitcher)
     {
-        $this->pdo = $pdo;
+        $this->DBConnection = $DBConnection;
         $this->PDOStatement = $PDOStatement;
         $this->parameters = $parameters;
         $this->fnDatabaseSwitcher = $fnDatabaseSwitcher;

@@ -20,9 +20,9 @@ abstract class EntityRepository
     protected $className;
 
     /**
-     * @var \PDO
+     * @var DBConnection
      */
-    protected $pdo;
+    protected $DBConnection;
 
     /**
      * @var QueryBuilderFactory
@@ -36,13 +36,13 @@ abstract class EntityRepository
 
     /**
      * EntityRepository constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
      * @param QueryBuilderFactory $queryBuilderFactory
      */
-    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory)
+    public function __construct(DBConnection $DBConnection, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, QueryBuilderFactory $queryBuilderFactory)
     {
-        $this->pdo = $pdo;
+        $this->DBConnection = $DBConnection;
         $this->snakeToCamelCaseStringConverter = $snakeToCamelCaseStringConverter;
         $this->queryBuilderFactory = $queryBuilderFactory;
     }

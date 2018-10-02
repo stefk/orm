@@ -192,14 +192,16 @@ class Factory
         $dynamicRepositoriesClass = $this->entityManagerNamespace . '\\DynamicRepositories';
         $dynamicManagersClass = $this->entityManagerNamespace . '\\DynamicManagers';
 
-        $queryBuilderFactory = new QueryBuilderFactory($pdo, $this->snakeToCamelCaseStringConverter, $this->databaseType, $databaseName);
+        $DBConnection = new DBConnection($pdo, $this->getUseDBFunction($databaseName));
 
-        $dynamicRepositories = new $dynamicRepositoriesClass($pdo, $this->snakeToCamelCaseStringConverter, $queryBuilderFactory);
-        $dynamicManagers = new $dynamicManagersClass($pdo, $dynamicRepositories);
+        $queryBuilderFactory = new QueryBuilderFactory($DBConnection, $this->snakeToCamelCaseStringConverter, $this->databaseType, $databaseName);
+
+        $dynamicRepositories = new $dynamicRepositoriesClass($DBConnection, $this->snakeToCamelCaseStringConverter, $queryBuilderFactory);
+        $dynamicManagers = new $dynamicManagersClass($DBConnection, $dynamicRepositories);
 
         $dynamicEntityManagerClass = $this->entityManagerNamespace . '\\DynamicEntityManager';
         $dynamicEntityManager = new $dynamicEntityManagerClass(
-            $pdo,
+            $DBConnection,
             $this->snakeToCamelCaseStringConverter,
             $dynamicRepositories,
             $dynamicManagers,
@@ -210,21 +212,22 @@ class Factory
 
         $dynamicManagers->setDynamicEntityManager($dynamicEntityManager);
         return $dynamicEntityManager;
-
-
     }
 
     /**
      * @param \PDO $pdo
+     * @param null $databaseName
      * @return EntityGeneratorInterface
      */
     public function createEntityGenerator(\PDO $pdo, $databaseName = null): EntityGeneratorInterface
     {
+        $DBConnection = new DBConnection($pdo, $this->getUseDBFunction($databaseName));
+
         switch($this->databaseType) {
             case self::DATABASE_TYPE_MYSQL :
                 return new EntityGenerator(
                     $this->snakeToCamelCaseStringConverter,
-                    new MySqlTableStructureRetriever($pdo, $databaseName),
+                    new MySqlTableStructureRetriever($DBConnection, $databaseName),
                     $this->entityDirectory,
                     $this->entityNamespace
                 );
@@ -240,11 +243,13 @@ class Factory
      */
     public function createEntityManagerGenerator(\PDO $pdo, $databaseName = null): EntityManagerGeneratorInterface
     {
+        $DBConnection = new DBConnection($pdo, $this->getUseDBFunction($databaseName));
+
         switch($this->databaseType) {
             case self::DATABASE_TYPE_MYSQL :
                 return new EntityManagerGenerator(
                     $this->snakeToCamelCaseStringConverter,
-                    new MySqlTableStructureRetriever($pdo, $databaseName),
+                    new MySqlTableStructureRetriever($DBConnection, $databaseName),
                     $this->entityManagerDirectory,
                     $this->entityManagerNamespace,
                     $this->userEntityRepositoryDirectory,
@@ -314,6 +319,26 @@ class Factory
             if(!class_exists($fullClass)) {
                 throw new \RuntimeException("The dynamic class \"$fullClass\" does not exists. Please generate the dynamic classes by using the generators. You can instantiate with it Factory::createEntityManagerGenerator() and Factory::createEntityGenerator() to generate entities.");
             }
+        }
+    }
+
+    /**
+     * @param string|null $databaseName
+     * @return \Closure
+     */
+    private function getUseDBFunction($databaseName = null)
+    {
+        switch($this->databaseType) {
+            case self::DATABASE_TYPE_MYSQL :
+                return function(\PDO $pdo) use ($databaseName) {
+                    if($databaseName) {
+                        if($stmt = $pdo->query('USE ' . $databaseName)) {
+                            return $stmt->execute();
+                        }
+                    }
+                    return false;
+                };
+                break;
         }
     }
 }

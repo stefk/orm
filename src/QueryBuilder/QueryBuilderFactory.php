@@ -3,14 +3,15 @@
 namespace Anytime\ORM\QueryBuilder;
 
 use Anytime\ORM\Converter\SnakeToCamelCaseStringConverter;
+use Anytime\ORM\EntityManager\DBConnection;
 use Anytime\ORM\EntityManager\Factory;
 
 class QueryBuilderFactory
 {
     /**
-     * @var \PDO
+     * @var DBConnection
      */
-    protected $pdo;
+    protected $DBConnection;
 
     /**
      * @var SnakeToCamelCaseStringConverter
@@ -29,15 +30,15 @@ class QueryBuilderFactory
 
     /**
      * QueryBuilderAbstract constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      * @param SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter
      * @param string $databaseType
      * @param string $databaseName
      */
-    public function __construct(\PDO $pdo, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, string $databaseType, $databaseName)
+    public function __construct(DBConnection $DBConnection, SnakeToCamelCaseStringConverter $snakeToCamelCaseStringConverter, string $databaseType, $databaseName)
     {
         $this->snakeToCamelCaseStringConverter = $snakeToCamelCaseStringConverter;
-        $this->pdo = $pdo;
+        $this->DBConnection = $DBConnection;
         $this->databaseType = $databaseType;
         $this->databaseName = $databaseName;
     }
@@ -49,7 +50,7 @@ class QueryBuilderFactory
     {
         switch($this->databaseType) {
             case Factory::DATABASE_TYPE_MYSQL:
-                $qb = new MySqlQueryBuilder($this->pdo, $this->snakeToCamelCaseStringConverter);
+                $qb = new MySqlQueryBuilder($this->DBConnection, $this->snakeToCamelCaseStringConverter);
                 $qb->setDatabaseName($this->databaseName);
                 return $qb;
             default:

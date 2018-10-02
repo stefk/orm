@@ -2,12 +2,14 @@
 
 namespace Anytime\ORM\Generator\EntityGenerator;
 
+use Anytime\ORM\EntityManager\DBConnection;
+
 class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
 {
     /**
-     * @var \PDO
+     * @var DBConnection
      */
-    private $pdo;
+    private $DBConnection;
 
     /**
      * @var string
@@ -16,12 +18,12 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
 
     /**
      * MySqlTableStructureRetriever constructor.
-     * @param \PDO $pdo
+     * @param DBConnection $DBConnection
      * @param string|null $databaseName
      */
-    public function __construct(\PDO $pdo, $databaseName = null)
+    public function __construct(DBConnection $DBConnection, $databaseName = null)
     {
-        $this->pdo = $pdo;
+        $this->DBConnection = $DBConnection;
         $this->databaseName = $databaseName;
     }
 
@@ -37,7 +39,7 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
             $this->useDatabaseName();
 
             $sql = 'SHOW TABLES';
-            $stmt = $this->pdo->prepare($sql);
+            $stmt = $this->DBConnection->prepare($sql);
             $stmt->execute();
 
             foreach($stmt->fetchAll() as $elem) {
@@ -63,8 +65,8 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
         $this->useDatabaseName();
 
         $sql = 'DESCRIBE `' . $tableName . '`';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt = $this->DBConnection->prepare($sql);
+        $stmt->setFetchMode(DBConnection::FETCH_ASSOC);
         $stmt->execute();
         $result = $stmt->fetchAll();
 
@@ -111,8 +113,8 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
         $this->useDatabaseName();
 
         $sql = 'SHOW INDEXES FROM `' . $tableName . '`';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt = $this->DBConnection->prepare($sql);
+        $stmt->setFetchMode(DBConnection::FETCH_ASSOC);
         $stmt->execute();
         $result = $stmt->fetchAll();
 
@@ -213,7 +215,7 @@ class MySqlTableStructureRetriever implements TableStructureRetrieverInterface
         if($this->databaseName) {
             $sql = 'USE `' . $this->databaseName . '`';
 
-            if($stmt = $this->pdo->prepare($sql)) {
+            if($stmt = $this->DBConnection->prepare($sql)) {
                 if($stmt->execute()) {
                     return true;
                 }
