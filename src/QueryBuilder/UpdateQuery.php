@@ -12,9 +12,8 @@ class UpdateQuery extends QueryAbstract implements UpdateQueryInterface
      * @param \PDOStatement $PDOStatement
      * @param $parameters
      * @param array $fieldsToUpdate
-     * @param callable $fnDatabaseSwitcher
      */
-    public function __construct(DBConnection $DBConnection, \PDOStatement $PDOStatement, $parameters, array $fieldsToUpdate = [], callable $fnDatabaseSwitcher)
+    public function __construct(DBConnection $DBConnection, \PDOStatement $PDOStatement, $parameters, array $fieldsToUpdate = [])
     {
         $newFieldsToUpdate = [];
 
@@ -25,7 +24,7 @@ class UpdateQuery extends QueryAbstract implements UpdateQueryInterface
 
         unset($fieldsToUpdate);
 
-        parent::__construct($DBConnection, $PDOStatement, $parameters + $newFieldsToUpdate, $fnDatabaseSwitcher);
+        parent::__construct($DBConnection, $PDOStatement, $parameters + $newFieldsToUpdate);
     }
 
     /**
@@ -33,7 +32,6 @@ class UpdateQuery extends QueryAbstract implements UpdateQueryInterface
      */
     public function execute(): int
     {
-        $this->selectDatabase();
         $this->PDOStatement->execute($this->parameters);
         $this->throwPdoError($this->PDOStatement);
         return $this->PDOStatement->rowCount();

@@ -188,9 +188,8 @@ abstract class EntityManager
      */
     public function selectQuery(string $sql, array $parameters = [], string $entityClass = null)
     {
-        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->DBConnection->prepare($sql);
-        $query = new SelectQuery($this->DBConnection, $statement, $parameters, $queryBuilder->getFnUseDatabase());
+        $query = new SelectQuery($this->DBConnection, $statement, $parameters);
 
         if($entityClass && class_exists($entityClass) && is_subclass_of($entityClass, Entity::class)) {
             $query->setEntityClass($entityClass);
@@ -206,9 +205,8 @@ abstract class EntityManager
      */
     public function deleteQuery(string $sql, array $parameters = [])
     {
-        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->DBConnection->prepare($sql);
-        $query = new DeleteQuery($this->DBConnection, $statement, $parameters, $queryBuilder->getFnUseDatabase());
+        $query = new DeleteQuery($this->DBConnection, $statement, $parameters);
         return $query;
     }
 
@@ -219,9 +217,8 @@ abstract class EntityManager
      */
     public function updateQuery(string $sql, array $parameters = [])
     {
-        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->DBConnection->prepare($sql);
-        $query = new UpdateQuery($this->DBConnection, $statement, $parameters, [], $queryBuilder->getFnUseDatabase());
+        $query = new UpdateQuery($this->DBConnection, $statement, $parameters, []);
         return $query;
     }
 
@@ -232,9 +229,8 @@ abstract class EntityManager
      */
     public function insertQuery(string $sql, array $parameters = [])
     {
-        $queryBuilder = $this->queryBuilderFactory->create($this->databaseType);
         $statement = $this->DBConnection->prepare($sql);
-        $query = new InsertQuery($this->DBConnection, $statement, $parameters, $queryBuilder->getFnUseDatabase());
+        $query = new InsertQuery($this->DBConnection, $statement, $parameters);
         return $query;
     }
 }

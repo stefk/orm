@@ -268,7 +268,7 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
             throw new \RuntimeException('Not in an ' . QueryBuilderAbstract::QUERY_TYPE_SELECT . ' context');
         }
         $statement = $this->DBConnection->prepare($this->getSelectSQL());
-        return (new SelectQuery($this->DBConnection, $statement, $this->parameters, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
+        return (new SelectQuery($this->DBConnection, $statement, $this->parameters))->setEntityClass($this->entityClass);
     }
 
     /**
@@ -282,7 +282,7 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
 
         $data = $entity->extractSetterUsedData();
         $statement = $this->DBConnection->prepare($this->getInsertSQL($data));
-        return (new InsertQuery($this->DBConnection, $statement, $data, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
+        return (new InsertQuery($this->DBConnection, $statement, $data))->setEntityClass($this->entityClass);
     }
 
     /**
@@ -306,11 +306,11 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
             }
 
             $statement = $this->DBConnection->prepare($this->getUpdateByPrimaryKeySQL($fieldsToUpdate));
-            return (new UpdateQuery($this->DBConnection, $statement, $data, $fieldsToUpdate, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
+            return (new UpdateQuery($this->DBConnection, $statement, $data, $fieldsToUpdate))->setEntityClass($this->entityClass);
 
         } else {
             $statement = $this->DBConnection->prepare($this->getUpdateByCriteriaSQL($this->fieldsToUpdate));
-            return (new UpdateQuery($this->DBConnection, $statement, $this->parameters, $this->fieldsToUpdate, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
+            return (new UpdateQuery($this->DBConnection, $statement, $this->parameters, $this->fieldsToUpdate))->setEntityClass($this->entityClass);
         }
     }
 
@@ -335,22 +335,6 @@ abstract class QueryBuilderAbstract implements QueryBuilderInterface
             $parameters = $this->parameters;
         }
 
-        return (new DeleteQuery($this->DBConnection, $statement, $parameters, $this->getFnUseDatabase()))->setEntityClass($this->entityClass);
-    }
-
-    /**
-     * @return callable
-     */
-    public function getFnUseDatabase(): callable
-    {
-        $sql = $this->getUseDatabaseSQL();
-        $DBConnection = $this->DBConnection;
-
-        return function() use ($sql, $DBConnection) {
-            if($stmt = $DBConnection->query($sql)) {
-                return $stmt->execute();
-            }
-            return false;
-        };
+        return (new DeleteQuery($this->DBConnection, $statement, $parameters))->setEntityClass($this->entityClass);
     }
 }
